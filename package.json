@@ -1,0 +1,21 @@
+{
+  "name": "pipehook",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev:web": "pnpm --filter web dev",
+    "dev:server": "pnpm --filter server start:dev",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "prettier": "^3.5.3",
+    "prisma": "^6.8.2"
+  },
+  "workspaces": [
+    "server",
+    "web"
+  ],
+  "dependencies": {
+    "@prisma/client": "^6.8.2"
+  }
+}
