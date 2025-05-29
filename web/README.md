@@ -1,75 +1,32 @@
-# Nuxt Minimal Starter
+# SolidStart
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Everything you need to build a Solid project, powered by [`solid-start`](https://start.solidjs.com);
 
-## Setup
-
-Make sure to install dependencies:
+## Creating a project
 
 ```bash
-# npm
-npm install
+# create a new project in the current directory
+npm init solid@latest
 
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
+# create a new project in my-app
+npm init solid@latest my-app
 ```
 
-## Development Server
+## Developing
 
-Start the development server on `http://localhost:3000`:
+Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
 
 ```bash
-# npm
 npm run dev
 
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
+# or start the server and open the app in a new browser tab
+npm run dev -- --open
 ```
 
-## Production
+## Building
 
-Build the application for production:
+Solid apps are built with _presets_, which optimise your project for deployment to different environments.
 
-```bash
-# npm
-npm run build
+By default, `npm run build` will generate a Node app that you can run with `npm start`. To use a different preset, add it to the `devDependencies` in `package.json` and specify in your `app.config.js`.
 
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+## This project was created with the [Solid CLI](https://github.com/solidjs-community/solid-cli)
