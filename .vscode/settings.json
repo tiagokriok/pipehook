@@ -1,20 +1,28 @@
 {
-  "deno.enablePaths": ["supabase/functions"],
-  "deno.lint": true,
-  "deno.unstable": [
-    "bare-node-builtins",
-    "byonm",
-    "sloppy-imports",
-    "unsafe-proto",
-    "webgpu",
-    "broadcast-channel",
-    "worker-options",
-    "cron",
-    "kv",
-    "ffi",
-    "fs",
-    "http",
-    "net"
-  ],
-  "editor.defaultFormatter": "esbenp.prettier-vscode"
+	"deno.enablePaths": ["supabase/functions"],
+	"deno.lint": true,
+	"deno.unstable": [
+		"bare-node-builtins",
+		"byonm",
+		"sloppy-imports",
+		"unsafe-proto",
+		"webgpu",
+		"broadcast-channel",
+		"worker-options",
+		"cron",
+		"kv",
+		"ffi",
+		"fs",
+		"http",
+		"net"
+	],
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"files.associations": {
+		"*.css": "tailwindcss"
+	},
+	"editor.quickSuggestions": {
+		"strings": "on"
+	},
+	"tailwindCSS.classAttributes": ["class", "ui"],
+	"tailwindCSS.experimental.classRegex": [["ui:\\s*{([^)]*)\\s*}", "(?:'|\"|`)([^']*)(?:'|\"|`)"]]
 }
