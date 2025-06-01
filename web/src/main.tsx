@@ -7,6 +7,7 @@ import { BrowserRouter } from 'react-router-dom'
 import App from '@/App.tsx'
 import { queryClient } from '@/lib/react-query'
 
+import '@fontsource/sora'
 import './index.css'
 
 createRoot(document.getElementById('root')!).render(
