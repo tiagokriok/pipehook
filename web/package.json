@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@fontsource/sora": "^5.2.5",
+    "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@supabase/supabase-js": "^2.49.8",
     "@tailwindcss/vite": "^4.1.8",
@@ -28,6 +29,8 @@
   "devDependencies": {
     "@eslint/js": "^9.25.0",
     "@iconify-json/ph": "^1.2.2",
+    "@svgr/core": "^8.1.0",
+    "@svgr/plugin-jsx": "^8.1.0",
     "@tanstack/react-query-devtools": "^5.79.0",
     "@types/node": "^22.15.24",
     "@types/react": "^19.1.2",

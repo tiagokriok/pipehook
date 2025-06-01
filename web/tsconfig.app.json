@@ -26,7 +26,7 @@
 		"paths": {
 			"@/*": ["./src/*"]
 		},
-		"types": ["unplugin-icons/types/jsx"]
+		"types": ["unplugin-icons/types/react"]
 	},
 	"include": ["src"]
 }
