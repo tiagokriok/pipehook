@@ -1,27 +1,14 @@
-import { Supabase } from '@/lib/supabase'
-import { useEffect, useState } from 'react'
+import { useAuth } from '@/hooks/useAuth'
 import { Navigate, Outlet } from 'react-router-dom'
 
 function PrivateRoute() {
-	const [loading, setLoading] = useState(true)
-	const [isAuthenticated, setIsAuthenticated] = useState(false)
-
-	useEffect(() => {
-		Supabase.auth.getSession().then(({ data: { session } }) => {
-			setIsAuthenticated(session !== null)
-			setLoading(false)
-		})
-	}, [])
+	const { loading, isAuthenticated } = useAuth()
 
 	if (loading) {
 		return <div>Loading...</div>
 	}
 
-	if (isAuthenticated) {
-		return <Outlet />
-	} else {
-		return <Navigate to="/" />
-	}
+	return isAuthenticated ? <Outlet /> : <Navigate to="/" />
 }
 
 export default PrivateRoute

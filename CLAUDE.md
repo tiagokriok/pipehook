@@ -95,15 +95,20 @@ docker-compose down -v && docker-compose up -d
 ### Frontend Architecture
 - **Build Tool**: Vite with SWC for fast compilation
 - **Styling**: Tailwind CSS v4 with custom components using Radix UI
+- **UI Components**: shadcn/ui component library (New York style)
+- **Design System**: Inspired by OriginUI patterns for modern interfaces
+- **Forms**: React Hook Form with custom validation
 - **State Management**: TanStack Query for server state, React Context for auth
 - **Routing**: React Router DOM v7 with layout-based routing
-- **Authentication**: Clerk with custom AuthProvider wrapper
-- **Icons**: Unplugin Icons with auto-install
+- **Authentication**: Clerk with custom forms (not default Clerk UI)
+- **Icons**: Lucide React + Unplugin Icons with auto-install
 - **Font**: Sora font family via @fontsource
 
 ### Component Structure
-- `src/components/`: Reusable UI components (Button, Card, Input, etc.)
-- `src/pages/`: Route-specific page components
+- `src/components/ui/`: shadcn/ui components (Button, Card, Input, Form, Alert, etc.)
+- `src/components/`: Custom reusable components (PrivateRoute)
+- `src/pages/auth/`: Authentication pages with custom Clerk forms (Login, SignUp)
+- `src/pages/app/`: Application pages (Dashboard)
 - `src/layouts/`: Layout components (App, Auth)
 - `src/contexts/`: React contexts (AuthContext)
 - `src/providers/`: Provider components (AuthProvider)
@@ -117,8 +122,10 @@ docker-compose down -v && docker-compose up -d
 
 ### Authentication Flow
 - **Provider**: `ClerkProvider` wraps the entire app in `main.tsx`
-- **Context**: Custom `AuthContext` provides unified auth interface
-- **Routes**: Public routes use `AuthLayout`, private routes use `PrivateRoute` + `AppLayout`
+- **Context**: Custom `AuthContext` provides unified auth interface  
+- **Custom Forms**: Custom sign-in/sign-up forms using shadcn/ui + Clerk hooks
+- **Features**: Email/password auth, Google OAuth, email verification, form validation
+- **Routes**: Public routes (`/`, `/sign-up`) use `AuthLayout`, private routes use `PrivateRoute` + `AppLayout`
 - **Environment**: Requires `VITE_CLERK_PUBLISHABLE_KEY` environment variable
 
 
@@ -141,6 +148,8 @@ docker-compose down -v && docker-compose up -d
 - ✅ Created Makefile with unified development commands
 - ✅ Set up Air hot reload for Go servers
 - ✅ Configured Go project structure
+- ✅ Implemented custom authentication forms with shadcn/ui
+- ✅ Added React Hook Form validation and error handling
 
 **Pending:**
 - 🔄 Implement Go API server (serve React app + API endpoints)
