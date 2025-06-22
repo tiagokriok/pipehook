@@ -1,30 +1,26 @@
-import type { User } from '@supabase/supabase-js'
-import { type ReactNode, useEffect, useState } from 'react'
+import { useAuth, useUser } from '@clerk/clerk-react'
+import { type ReactNode } from 'react'
 
 import { AuthContext } from '@/contexts/AuthContext'
-import { Supabase } from '@/lib/supabase'
 
 function AuthProvider({ children }: { children: ReactNode }) {
-	const [user, setUser] = useState<User | null>(null)
-	const [loading, setLoading] = useState(true)
+	const { isLoaded, isSignedIn, signOut } = useAuth()
+	const { user } = useUser()
 
-	useEffect(() => {
-		Supabase.auth.getUser().then(({ data: { user } }) => {
-			setUser(user)
-			setLoading(false)
-		})
-
-		const { data: listener } = Supabase.auth.onAuthStateChange((_event, session) => {
-			setUser(session?.user || null)
-		})
-
-		return () => {
-			listener.subscription.unsubscribe()
-		}
-	}, [])
+	const signIn = () => {
+		window.location.href = '/sign-in'
+	}
 
 	return (
-		<AuthContext.Provider value={{ user, loading, isAuthenticated: !!user }}>
+		<AuthContext.Provider 
+			value={{ 
+				user, 
+				loading: !isLoaded, 
+				isAuthenticated: !!isSignedIn,
+				signIn,
+				signOut
+			}}
+		>
 			{children}
 		</AuthContext.Provider>
 	)

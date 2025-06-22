@@ -5,6 +5,7 @@ import AppLayout from '@/layouts/App'
 import AuthLayout from '@/layouts/Auth'
 import Dashboard from '@/pages/app/Dashboard'
 import Login from '@/pages/auth/Login'
+import SignUp from '@/pages/auth/SignUp'
 import AuthProvider from '@/providers/AuthProvider'
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
 				{/* Public Routes */}
 				<Route element={<AuthLayout />}>
 					<Route path="/" element={<Login />} />
+					<Route path="/sign-up" element={<SignUp />} />
 				</Route>
 
 				{/* Private Routes */}
