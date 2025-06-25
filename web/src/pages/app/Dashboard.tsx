@@ -1,4 +1,5 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -6,11 +7,68 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { UserButton, useUser } from "@clerk/clerk-react";
-import { Calendar, CheckCircle, Mail, User } from "lucide-react";
+import { UserButton, useAuth, useUser } from "@clerk/clerk-react";
+import { Calendar, CheckCircle, Copy, Mail, User, Zap } from "lucide-react";
+import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
 
 function Page() {
 	const { user } = useUser();
+	const { getToken } = useAuth();
+	const [token, setToken] = useState<string | null>(null);
+	const [tokenError, setTokenError] = useState<string | null>(null);
+	const [tokenCopied, setTokenCopied] = useState(false);
+	const [apiTestResult, setApiTestResult] = useState<string | null>(null);
+	const [apiTestLoading, setApiTestLoading] = useState(false);
+
+	// Fetch JWT token for development/testing purposes
+	useEffect(() => {
+		if (import.meta.env.DEV && user) {
+			const fetchToken = async () => {
+				try {
+					const token = await getToken();
+					setToken(token);
+					setTokenError(null);
+				} catch (error) {
+					setTokenError(error instanceof Error ? error.message : 'Failed to get token');
+					setToken(null);
+				}
+			};
+
+			fetchToken();
+		}
+	}, [user, getToken]);
+
+	const copyTokenToClipboard = async () => {
+		if (token) {
+			try {
+				await navigator.clipboard.writeText(token);
+				setTokenCopied(true);
+				setTimeout(() => setTokenCopied(false), 2000);
+			} catch (error) {
+				console.error('Failed to copy token:', error);
+			}
+		}
+	};
+
+	const testApiCall = async () => {
+		setApiTestLoading(true);
+		setApiTestResult(null);
+		
+		try {
+			// Test the health endpoint (public)
+			const healthResult = await api.health.check();
+			setApiTestResult(`✅ Health check successful: ${JSON.stringify(healthResult)}`);
+		} catch (error) {
+			if (error instanceof Error) {
+				setApiTestResult(`❌ API Error: ${error.message}`);
+			} else {
+				setApiTestResult(`❌ Unknown error: ${JSON.stringify(error)}`);
+			}
+		} finally {
+			setApiTestLoading(false);
+		}
+	};
 
 	if (!user) {
 		return <div>Loading...</div>;
@@ -146,11 +204,90 @@ function Page() {
 				</CardContent>
 			</Card>
 
-			{/* Debug Information (Development) */}
-			{import.meta.env.NODE_ENV === "development" && (
+			{/* JWT Token (Development) */}
+			{import.meta.env.DEV && (
 				<Card>
 					<CardHeader>
-						<CardTitle className="text-sm">Debug Information</CardTitle>
+						<CardTitle className="text-sm flex items-center gap-2">
+							🔑 JWT Token
+							<span className="text-xs font-normal text-muted-foreground">
+								(Development Only)
+							</span>
+						</CardTitle>
+						<CardDescription className="text-xs">
+							Use this token for API testing. Copy it to your clipboard and include it in Authorization headers.
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="space-y-4">
+						{tokenError ? (
+							<Alert variant="destructive">
+								<AlertDescription className="text-xs">
+									Error fetching token: {tokenError}
+								</AlertDescription>
+							</Alert>
+						) : token ? (
+							<>
+								<div className="space-y-2">
+									<label className="text-xs font-medium">Bearer Token:</label>
+									<div className="flex items-center gap-2">
+										<div className="flex-1 text-xs bg-muted p-3 rounded font-mono break-all">
+											{token}
+										</div>
+										<Button
+											size="sm"
+											variant="outline"
+											onClick={copyTokenToClipboard}
+											className="flex-shrink-0"
+										>
+											<Copy className="h-3 w-3" />
+											{tokenCopied ? "Copied!" : "Copy"}
+										</Button>
+									</div>
+								</div>
+								
+								<div className="space-y-2">
+									<div className="flex items-center justify-between">
+										<label className="text-xs font-medium">API Test:</label>
+										<Button
+											size="sm"
+											variant="secondary"
+											onClick={testApiCall}
+											disabled={apiTestLoading}
+											className="flex items-center gap-1"
+										>
+											<Zap className="h-3 w-3" />
+											{apiTestLoading ? "Testing..." : "Test Health API"}
+										</Button>
+									</div>
+									{apiTestResult && (
+										<div className="text-xs bg-muted p-2 rounded font-mono">
+											{apiTestResult}
+										</div>
+									)}
+								</div>
+								
+								<div className="text-xs text-muted-foreground space-y-1">
+									<p><strong>Usage:</strong> Add to request headers as:</p>
+									<code className="bg-muted px-2 py-1 rounded">
+										Authorization: Bearer {token.slice(0, 20)}...
+									</code>
+									<p className="text-xs mt-1">
+										<strong>Base URL:</strong> {import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api'}
+									</p>
+								</div>
+							</>
+						) : (
+							<div className="text-xs text-muted-foreground">Loading token...</div>
+						)}
+					</CardContent>
+				</Card>
+			)}
+
+			{/* Debug Information (Development) */}
+			{import.meta.env.DEV && (
+				<Card>
+					<CardHeader>
+						<CardTitle className="text-sm">User Debug Information</CardTitle>
 						<CardDescription className="text-xs">
 							Development only - User object details
 						</CardDescription>
