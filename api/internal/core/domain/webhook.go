@@ -3,6 +3,7 @@ package domain
 import (
 	"context"
 	"pipehook/api/internal/core/port"
+	"pipehook/api/pkg/id"
 	"time"
 )
 
@@ -18,7 +19,6 @@ type Webhook struct {
 	Label       string    `json:"label"`
 	URL         string    `json:"url"`
 	Enabled     bool      `json:"enabled"`
-	Slug        string    `json:"slug"`
 	Delay       int       `json:"delay"`
 	Concurrency int       `json:"concurrency"`
 	Queue       QueueType `json:"queueType"`
@@ -35,4 +35,18 @@ type WebhookRepository interface {
 	FindById(context context.Context, organizationID, id string) (*Webhook, error)
 	FindAllByOrganizationId(context context.Context, organizationID string, query *port.QueryParams) ([]Webhook, error)
 	DestroyById(context context.Context, organizationID, id string) error
+}
+
+func NewWebhook(label, url string, enabled bool, delay, concurrency int, queueType QueueType) *Webhook {
+	return &Webhook{
+		ID:          id.NewWebhook().String(),
+		Label:       label,
+		URL:         url,
+		Enabled:     enabled,
+		Delay:       delay,
+		Concurrency: concurrency,
+		Queue:       queueType,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
 }
