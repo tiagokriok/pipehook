@@ -4,9 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"pipehook/api/internal/core/port"
+	"pipehook/api/pkg/id"
 	"time"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type EventStatus string
@@ -43,8 +42,20 @@ type Event struct {
 
 type EventRepository interface {
 	Store(context context.Context, organizationID string, event Event) error
-	UpdateById(context context.Context, organizationID string, id primitive.ObjectID, event *Event) error
-	FindById(context context.Context, id primitive.ObjectID) (*Event, error)
+	UpdateById(context context.Context, organizationID, id string, event *Event) error
+	FindById(context context.Context, id string) (*Event, error)
 	FindAllByOrganizationId(context context.Context, organizationID string, query *port.QueryParams) ([]Event, error)
-	DestroyById(context context.Context, organizationID string, id primitive.ObjectID) error
+	DestroyById(context context.Context, organizationID, id string) error
+}
+
+func NewEvent(method string, headers map[string][]string, payload interface{}, webhookID string) Event {
+	return Event{
+		ID:        id.NewEvent().String(),
+		Method:    method,
+		Headers:   headers,
+		Payload:   json.RawMessage(payload.([]byte)),
+		Status:    EventStatusPending,
+		WebhookID: webhookID,
+		CreatedAt: time.Now(),
+	}
 }
