@@ -5,7 +5,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/paralleldrive/cuid2"
+	"github.com/nrednav/cuid2"
 )
 
 var (
@@ -15,7 +15,7 @@ var (
 
 func init() {
 	once.Do(func() {
-		generator = cuid2.Init(cuid2.WithLength(24), cuid2.WithFingerprint("pipehook"))
+		generator, _ = cuid2.Init(cuid2.WithLength(24), cuid2.WithFingerprint("pipehook"))
 	})
 }
 

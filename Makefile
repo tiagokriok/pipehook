@@ -42,18 +42,18 @@ build-web: ## Build React app for production
 
 ##@ Database Commands
 
-db-up: ## Start PostgreSQL database
-	@echo "🐘 Starting PostgreSQL database..."
-	@docker-compose up -d postgres
+db-up: ## Start
+	@echo "🐘 Starting..."
+	@docker compose up -d
 
-db-down: ## Stop PostgreSQL database
+db-down: ## Stop
 	@echo "🛑 Stopping PostgreSQL database..."
-	@docker-compose down
+	@docker compose down
 
 db-reset: ## Reset database (remove volumes and restart)
 	@echo "🔄 Resetting PostgreSQL database..."
-	@docker-compose down -v
-	@docker-compose up -d postgres
+	@docker compose down -v
+	@docker compose up -d
 
 ##@ Setup Commands
 
