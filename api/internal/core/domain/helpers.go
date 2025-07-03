@@ -1,4 +1,3 @@
-// internal/core/domain/helpers.go
 package domain
 
 import (

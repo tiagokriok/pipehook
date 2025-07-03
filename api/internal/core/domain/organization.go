@@ -46,14 +46,14 @@ type OrganizationRepository interface {
 	DestroyById(context context.Context, id string) error
 }
 
-func NewOrganization(name, ownerId string) (*Organization, error) {
+func NewOrganization(name, ownerID string) (*Organization, error) {
 	name = strings.TrimSpace(name)
 
 	if name == "" {
 		return nil, errors.New("organization name is required")
 	}
 
-	if err := id.ValidatePrefix(ownerId, id.UserPrefix); err != nil {
+	if err := id.ValidatePrefix(ownerID, id.UserPrefix); err != nil {
 		return nil, errors.New("owner id is required")
 	}
 
@@ -61,7 +61,7 @@ func NewOrganization(name, ownerId string) (*Organization, error) {
 		ID:      id.NewOrganization().String(),
 		Name:    name,
 		Plan:    PlanFree,
-		OwnerID: ownerId,
+		OwnerID: ownerID,
 		Settings: Settings{
 			WebhookLimit:   10,
 			EventRetention: 7,
