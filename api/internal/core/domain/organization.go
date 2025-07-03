@@ -2,24 +2,34 @@ package domain
 
 import (
 	"context"
+	"errors"
 	"pipehook/api/internal/core/port"
 	"pipehook/api/pkg/id"
+	"strings"
 	"time"
 )
 
-type PlanType string
+type Plan string
 
 const (
-	PlanFree  PlanType = "free"
-	PlanPro   PlanType = "pro"
-	PlanTrial PlanType = "trial"
+	PlanFree       Plan = "free"
+	PlanStarter    Plan = "starter"
+	PlanPro        Plan = "pro"
+	PlanEnterprise Plan = "enterprise"
 )
 
+type Settings struct {
+	WebhookLimit   int `json:"webhookLimit"`
+	EventRetention int `json:"eventRetentionDays"`
+	TeamMembers    int `json:"teamMembers"`
+}
+
 type Organization struct {
-	ID     string   `json:"id"`
-	Name   string   `json:"name"`
-	Avatar string   `json:"avatar,omitempty"` // URL
-	Plan   PlanType `json:"plan"`
+	ID       string   `json:"id"`
+	Name     string   `json:"name"`
+	Avatar   string   `json:"avatar,omitempty"` // URL
+	Plan     Plan     `json:"plan"`
+	Settings Settings `json:"settings"`
 
 	OwnerID string `json:"ownerId"`
 
@@ -36,12 +46,55 @@ type OrganizationRepository interface {
 	DestroyById(context context.Context, id string) error
 }
 
-func NewOrganization(name string) *Organization {
+func NewOrganization(name, ownerId string) (*Organization, error) {
+	name = strings.TrimSpace(name)
+
+	if name == "" {
+		return nil, errors.New("organization name is required")
+	}
+
+	if err := id.ValidatePrefix(ownerId, id.UserPrefix); err != nil {
+		return nil, errors.New("owner id is required")
+	}
+
 	return &Organization{
-		ID:        id.NewOrganization().String(),
-		Name:      name,
-		Plan:      PlanFree,
+		ID:      id.NewOrganization().String(),
+		Name:    name,
+		Plan:    PlanFree,
+		OwnerID: ownerId,
+		Settings: Settings{
+			WebhookLimit:   10,
+			EventRetention: 7,
+			TeamMembers:    3,
+		},
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
+	}, nil
+}
+
+func (o *Organization) UpgradePlan(newPlan Plan) {
+	o.Plan = newPlan
+	o.UpdatedAt = time.Now()
+
+	switch newPlan {
+	case PlanStarter:
+		o.Settings.WebhookLimit = 50
+		o.Settings.EventRetention = 30
+		o.Settings.TeamMembers = 10
+	case PlanPro:
+		o.Settings.WebhookLimit = 500
+		o.Settings.EventRetention = 90
+		o.Settings.TeamMembers = 50
+	case PlanEnterprise:
+		o.Settings.WebhookLimit = -1 // Unlimited
+		o.Settings.EventRetention = 365
+		o.Settings.TeamMembers = -1 // Unlimited
 	}
+}
+
+func (o *Organization) CanCreateWebhook(currentCount int) bool {
+	if o.Settings.WebhookLimit == -1 {
+		return true
+	}
+	return currentCount < o.Settings.WebhookLimit
 }
