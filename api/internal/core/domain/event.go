@@ -1,8 +1,12 @@
 package domain
 
 import (
+	"context"
 	"encoding/json"
+	"pipehook/api/internal/core/port"
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type EventStatus string
@@ -35,4 +39,12 @@ type Event struct {
 	CreatedAt time.Time  `json:"createdAt"`
 	ProcessAt *time.Time `json:"processAt"`
 	ExpireAt  time.Time  `json:"expireAt"`
+}
+
+type EventRepository interface {
+	Store(context context.Context, organizationID string, event Event) error
+	UpdateById(context context.Context, organizationID string, id primitive.ObjectID, event *Event) error
+	FindById(context context.Context, id primitive.ObjectID) (*Event, error)
+	FindAllByOrganizationId(context context.Context, organizationID string, query *port.QueryParams) ([]Event, error)
+	DestroyById(context context.Context, organizationID string, id primitive.ObjectID) error
 }
