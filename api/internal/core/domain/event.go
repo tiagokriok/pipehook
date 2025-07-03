@@ -48,14 +48,24 @@ type EventRepository interface {
 	DestroyById(context context.Context, organizationID, id string) error
 }
 
-func NewEvent(method string, headers map[string][]string, payload interface{}, webhookID string) Event {
-	return Event{
+func NewEvent(method string, headers map[string][]string, payload interface{}, webhookID string) (*Event, error) {
+	if err := id.ValidatePrefix(webhookID, id.WebhookPrefix); err != nil {
+		return nil, err
+	}
+
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Event{
 		ID:        id.NewEvent().String(),
 		Method:    method,
 		Headers:   headers,
-		Payload:   json.RawMessage(payload.([]byte)),
+		Payload:   payloadBytes,
 		Status:    EventStatusPending,
 		WebhookID: webhookID,
 		CreatedAt: time.Now(),
-	}
+		ExpireAt:  time.Now().Add(7 * 24 * time.Hour),
+	}, nil
 }
