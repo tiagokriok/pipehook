@@ -3,7 +3,6 @@ package domain
 import (
 	"context"
 	"errors"
-	"net/mail"
 	"pipehook/api/internal/core/port"
 	"pipehook/api/pkg/id"
 	"strings"
@@ -80,12 +79,4 @@ func (u *User) ChangeRole(newRole UserRole) error {
 	u.Role = newRole
 	u.UpdatedAt = time.Now()
 	return nil
-}
-
-func isValidEmail(email string) bool {
-	_, err := mail.ParseAddress(email)
-	if err != nil {
-		return false
-	}
-	return true
 }
