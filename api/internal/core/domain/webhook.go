@@ -1,6 +1,10 @@
 package domain
 
-import "time"
+import (
+	"context"
+	"pipehook/api/internal/core/port"
+	"time"
+)
 
 type QueueType string
 
@@ -23,4 +27,12 @@ type Webhook struct {
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+type WebhookRepository interface {
+	Strore(context context.Context, organizationID string, webhook *Webhook) error
+	UpdateById(context context.Context, organizationID, id string, webhook *Webhook) error
+	FindById(context context.Context, organizationID, id string) (*Webhook, error)
+	FindAllByOrganizationId(context context.Context, organizationID string, query *port.QueryParams) ([]Webhook, error)
+	DestroyById(context context.Context, organizationID, id string) error
 }
