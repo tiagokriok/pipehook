@@ -60,6 +60,22 @@ func NewWebhook(label, endpoint, organizationID string, enabled bool, delay, con
 		return nil, err
 	}
 
+	if delay < 0 {
+		return nil, errors.New("delay must be greater than or equal to 0")
+	}
+
+	if concurrency < 0 {
+		return nil, errors.New("concurrency must be greater than or equal to 0")
+	}
+
+	if queueType != QueueTypeFifo && queueType != QueueTypeStandard {
+		return nil, errors.New("invalid queue type")
+	}
+
+	if isLocalhost(parsedURL.Host) {
+		return nil, errors.New("invalid endpoint")
+	}
+
 	return &Webhook{
 		ID:          id.NewWebhook().String(),
 		Label:       label,
