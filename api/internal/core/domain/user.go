@@ -2,8 +2,11 @@ package domain
 
 import (
 	"context"
+	"errors"
+	"net/mail"
 	"pipehook/api/internal/core/port"
 	"pipehook/api/pkg/id"
+	"strings"
 	"time"
 )
 
@@ -39,7 +42,13 @@ type UserRepository interface {
 	SignIn(context context.Context, user *User) (string, error)
 }
 
-func NewUser(name, email, username string, role UserRole) *User {
+func NewUser(name, email, username string, role UserRole) (*User, error) {
+	email = strings.TrimSpace(strings.ToLower(email))
+
+	if email == "" || !isValidEmail(email) {
+		return nil, errors.New("invalid email")
+	}
+
 	return &User{
 		ID:        id.NewUser().String(),
 		Name:      name,
@@ -48,5 +57,35 @@ func NewUser(name, email, username string, role UserRole) *User {
 		Role:      role,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
+	}, nil
+}
+
+func (u *User) IsOwner() bool {
+	return u.Role == UserRoleOwner
+}
+
+func (u *User) IsAdmin() bool {
+	return u.Role == UserRoleAdmin || u.Role == UserRoleOwner
+}
+
+func (u *User) IsMember() bool {
+	return u.Role == UserRoleMember || u.Role == UserRoleAdmin || u.Role == UserRoleOwner
+}
+
+func (u *User) ChangeRole(newRole UserRole) error {
+	if u.Role == UserRoleOwner && newRole != UserRoleOwner {
+		return errors.New("cannot change owner role")
 	}
+
+	u.Role = newRole
+	u.UpdatedAt = time.Now()
+	return nil
+}
+
+func isValidEmail(email string) bool {
+	_, err := mail.ParseAddress(email)
+	if err != nil {
+		return false
+	}
+	return true
 }
