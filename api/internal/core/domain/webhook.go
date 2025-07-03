@@ -51,7 +51,7 @@ func NewWebhook(label, endpoint, organizationID string, enabled bool, delay, con
 		return nil, err
 	}
 
-	if label := strings.TrimSpace(label); label == "" {
+	if label = strings.TrimSpace(label); label == "" {
 		return nil, errors.New("label is required")
 	}
 
