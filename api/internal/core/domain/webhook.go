@@ -2,8 +2,11 @@ package domain
 
 import (
 	"context"
+	"errors"
+	"net/url"
 	"pipehook/api/internal/core/port"
 	"pipehook/api/pkg/id"
+	"strings"
 	"time"
 )
 
@@ -14,14 +17,20 @@ const (
 	QueueTypeStandard QueueType = "standard"
 )
 
+type RetryPolicy struct {
+	MaxAttempts int           `json:"maxAttempts"`
+	Backoff     time.Duration `json:"backoff"`
+}
+
 type Webhook struct {
-	ID          string    `json:"id"`
-	Label       string    `json:"label"`
-	URL         string    `json:"url"`
-	Enabled     bool      `json:"enabled"`
-	Delay       int       `json:"delay"`
-	Concurrency int       `json:"concurrency"`
-	Queue       QueueType `json:"queueType"`
+	ID          string      `json:"id"`
+	Label       string      `json:"label"`
+	Endpoint    string      `json:"endpoint"`
+	Enabled     bool        `json:"enabled"`
+	Delay       int         `json:"delay"`
+	Concurrency int         `json:"concurrency"`
+	Queue       QueueType   `json:"queueType"`
+	RetryPolicy RetryPolicy `json:"retryPolicy"`
 
 	OrganizationID string `json:"organizationId"`
 
@@ -37,16 +46,29 @@ type WebhookRepository interface {
 	DestroyById(context context.Context, organizationID, id string) error
 }
 
-func NewWebhook(label, url string, enabled bool, delay, concurrency int, queueType QueueType) *Webhook {
+func NewWebhook(label, endpoint, organizationID string, enabled bool, delay, concurrency int, queueType QueueType) (*Webhook, error) {
+	if err := id.ValidatePrefix(organizationID, id.OrganizationPrefix); err != nil {
+		return nil, err
+	}
+
+	if label := strings.TrimSpace(label); label == "" {
+		return nil, errors.New("label is required")
+	}
+
+	parsedURL, err := url.Parse(endpoint)
+	if err != nil || parsedURL.Scheme == "" || parsedURL.Host == "" {
+		return nil, err
+	}
+
 	return &Webhook{
 		ID:          id.NewWebhook().String(),
 		Label:       label,
-		URL:         url,
+		Endpoint:    endpoint,
 		Enabled:     enabled,
 		Delay:       delay,
 		Concurrency: concurrency,
 		Queue:       queueType,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
-	}
+	}, nil
 }
