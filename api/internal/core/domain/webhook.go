@@ -2,6 +2,8 @@ package domain
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"net/url"
 	"pipehook/api/internal/core/port"
@@ -31,6 +33,7 @@ type Webhook struct {
 	Concurrency int         `json:"concurrency"`
 	Queue       QueueType   `json:"queueType"`
 	RetryPolicy RetryPolicy `json:"retryPolicy"`
+	Secret      string      `json:"secret"`
 
 	OrganizationID string `json:"organizationId"`
 
@@ -44,6 +47,12 @@ type WebhookRepository interface {
 	FindById(context context.Context, organizationID, id string) (*Webhook, error)
 	FindAllByOrganizationId(context context.Context, organizationID string, query *port.QueryParams) ([]Webhook, error)
 	DestroyById(context context.Context, organizationID, id string) error
+}
+
+func generateWebhookSecret() string {
+	bytes := make([]byte, 32)
+	rand.Read(bytes)
+	return "whsec_" + hex.EncodeToString(bytes) // whsec_abc123...
 }
 
 func NewWebhook(label, endpoint, organizationID string, enabled bool, delay, concurrency int, queueType QueueType) (*Webhook, error) {
@@ -84,6 +93,7 @@ func NewWebhook(label, endpoint, organizationID string, enabled bool, delay, con
 		Delay:       delay,
 		Concurrency: concurrency,
 		Queue:       queueType,
+		Secret:      generateWebhookSecret(),
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}, nil
