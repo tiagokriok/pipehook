@@ -18,6 +18,7 @@ const (
 )
 
 type DeliveryAttempt struct {
+	ID             string        `json:"id"`
 	AttemptedAt    time.Time     `json:"attemptedAt"`
 	ResponseStatus int           `json:"responseStatus"`
 	ResponseBody   string        `json:"responseBody"`
@@ -27,11 +28,12 @@ type DeliveryAttempt struct {
 
 type Event struct {
 	ID       string              `json:"id"`
-	Method   string              `json:"method"`
 	Headers  map[string][]string `json:"headers"`
 	Payload  json.RawMessage     `json:"payload"`
 	Status   EventStatus         `json:"status"`
 	Attempts []DeliveryAttempt   `json:"attempts"`
+	Size     int64               `json:"size"`
+	SourceIP string              `json:"sourceIp"`
 
 	WebhookID string `json:"webhook_id"`
 
@@ -60,7 +62,6 @@ func NewEvent(method string, headers map[string][]string, payload interface{}, w
 
 	return &Event{
 		ID:        id.NewEvent().String(),
-		Method:    method,
 		Headers:   headers,
 		Payload:   payloadBytes,
 		Status:    EventStatusPending,

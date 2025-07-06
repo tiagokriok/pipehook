@@ -7,6 +7,7 @@ const (
 	UserPrefix         Prefix = "usr"
 	OrganizationPrefix Prefix = "org"
 	EventPrefix        Prefix = "evn"
+	DeliveryPrefix     Prefix = "dly"
 )
 
 type ID struct {

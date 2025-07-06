@@ -42,6 +42,10 @@ func NewEvent() ID {
 	return New(EventPrefix)
 }
 
+func NewDeliveryAttempt() ID {
+	return New(DeliveryPrefix)
+}
+
 func Parse(id string) (ID, error) {
 	parts := strings.SplitN(id, "_", 2)
 
