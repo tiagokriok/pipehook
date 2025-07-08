@@ -31,8 +31,6 @@ type Organization struct {
 	Plan     Plan     `json:"plan"`
 	Settings Settings `json:"settings"`
 
-	OwnerID string `json:"ownerId"`
-
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
@@ -58,10 +56,9 @@ func NewOrganization(name, ownerID string) (*Organization, error) {
 	}
 
 	return &Organization{
-		ID:      id.NewOrganization().String(),
-		Name:    name,
-		Plan:    PlanFree,
-		OwnerID: ownerID,
+		ID:   id.NewOrganization().String(),
+		Name: name,
+		Plan: PlanFree,
 		Settings: Settings{
 			WebhookLimit:   10,
 			EventRetention: 7,
