@@ -17,7 +17,7 @@ INSERT INTO organizations
 	(id, name, plan, settings)
 VALUES
 	($1, $2, $3, $4)
-RETURNING id, name, avatar, plan, settings, created_at, updated_at
+RETURNING id, name, avatar, plan, settings, created_at, updated_at, deleted_at
 `
 
 type CreateOrganizationParams struct {
@@ -43,6 +43,7 @@ func (q *Queries) CreateOrganization(ctx context.Context, arg CreateOrganization
 		&i.Settings,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
@@ -50,7 +51,7 @@ func (q *Queries) CreateOrganization(ctx context.Context, arg CreateOrganization
 const getOrganization = `-- name: GetOrganization :one
 SELECT id, name, plan, settings, created_at, updated_at FROM organizations
 WHERE
-	id = $1
+	id = $1 AND deleted_at IS NULL
 `
 
 type GetOrganizationRow struct {
@@ -76,6 +77,19 @@ func (q *Queries) GetOrganization(ctx context.Context, id string) (GetOrganizati
 	return i, err
 }
 
+const softDeleteOrganization = `-- name: SoftDeleteOrganization :exec
+UPDATE organizations
+SET
+	deleted_at = now()
+WHERE
+	id = $1
+`
+
+func (q *Queries) SoftDeleteOrganization(ctx context.Context, id string) error {
+	_, err := q.exec(ctx, q.softDeleteOrganizationStmt, softDeleteOrganization, id)
+	return err
+}
+
 const updateOrganization = `-- name: UpdateOrganization :one
 UPDATE organizations
 SET
@@ -84,8 +98,8 @@ SET
 	settings = $4,
 	updated_at = now()
 WHERE
-	id = $1
-RETURNING id, name, avatar, plan, settings, created_at, updated_at
+	id = $1 AND deleted_at IS NULL
+RETURNING id, name, avatar, plan, settings, created_at, updated_at, deleted_at
 `
 
 type UpdateOrganizationParams struct {
@@ -111,6 +125,7 @@ func (q *Queries) UpdateOrganization(ctx context.Context, arg UpdateOrganization
 		&i.Settings,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
@@ -121,7 +136,7 @@ SET
 	avatar = $2,
 	updated_at = now()
 WHERE
-	id = $1
+	id = $1 AND deleted_at IS NULL
 `
 
 type UpdateOrganizationAvatarParams struct {
@@ -141,7 +156,7 @@ SET
 	settings = $3,
 	updated_at = now()
 WHERE
-	id = $1
+	id = $1 AND deleted_at IS NULL
 `
 
 type UpdateOrganizationPlanParams struct {

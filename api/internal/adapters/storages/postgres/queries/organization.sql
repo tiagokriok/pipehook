@@ -13,13 +13,13 @@ SET
 	settings = $4,
 	updated_at = now()
 WHERE
-	id = $1
+	id = $1 AND deleted_at IS NULL
 RETURNING *;
 
 -- name: GetOrganization :one
 SELECT id, name, plan, settings, created_at, updated_at FROM organizations
 WHERE
-	id = $1;
+	id = $1 AND deleted_at IS NULL;
 
 -- name: UpdateOrganizationPlan :exec
 UPDATE organizations
@@ -28,12 +28,19 @@ SET
 	settings = $3,
 	updated_at = now()
 WHERE
-	id = $1;
+	id = $1 AND deleted_at IS NULL;
 
 -- name: UpdateOrganizationAvatar :exec
 UPDATE organizations
 SET
 	avatar = $2,
 	updated_at = now()
+WHERE
+	id = $1 AND deleted_at IS NULL;
+
+-- name: SoftDeleteOrganization :exec
+UPDATE organizations
+SET
+	deleted_at = now()
 WHERE
 	id = $1;

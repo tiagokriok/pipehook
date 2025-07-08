@@ -16,7 +16,7 @@ INSERT INTO webhooks
 	(id, label, endpoint, enabled, delay, concurrency, queue, retry_policy, organization_id, secret)
 VALUES
 	($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-RETURNING id, label, endpoint, enabled, delay, concurrency, queue, retry_policy, organization_id, created_at, updated_at, secret
+RETURNING id, label, endpoint, enabled, delay, concurrency, queue, retry_policy, organization_id, created_at, updated_at, secret, deleted_at
 `
 
 type CreateWebhookParams struct {
@@ -59,6 +59,7 @@ func (q *Queries) CreateWebhook(ctx context.Context, arg CreateWebhookParams) (W
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Secret,
+		&i.DeletedAt,
 	)
 	return i, err
 }
@@ -66,7 +67,7 @@ func (q *Queries) CreateWebhook(ctx context.Context, arg CreateWebhookParams) (W
 const getAllWebhooks = `-- name: GetAllWebhooks :many
 SELECT id, label, endpoint, enabled, delay, concurrency, queue, retry_policy, organization_id, created_at, updated_at FROM webhooks
 WHERE
-	organization_id = $1
+	organization_id = $1 AND deleted_at IS NULL
 ORDER BY created_at
 `
 
@@ -122,7 +123,7 @@ func (q *Queries) GetAllWebhooks(ctx context.Context, organizationID string) ([]
 const getWebhook = `-- name: GetWebhook :one
 SELECT id, label, endpoint, enabled, delay, concurrency, queue, retry_policy, organization_id, created_at, updated_at FROM webhooks
 WHERE
-	id = $1 AND organization_id = $2
+	id = $1 AND organization_id = $2 AND deleted_at IS NULL
 `
 
 type GetWebhookParams struct {
@@ -163,6 +164,24 @@ func (q *Queries) GetWebhook(ctx context.Context, arg GetWebhookParams) (GetWebh
 	return i, err
 }
 
+const softDeleteWebhook = `-- name: SoftDeleteWebhook :exec
+UPDATE webhooks
+SET
+	deleted_at = now()
+WHERE
+	id = $1 AND organization_id = $2
+`
+
+type SoftDeleteWebhookParams struct {
+	ID             string `json:"id"`
+	OrganizationID string `json:"organization_id"`
+}
+
+func (q *Queries) SoftDeleteWebhook(ctx context.Context, arg SoftDeleteWebhookParams) error {
+	_, err := q.exec(ctx, q.softDeleteWebhookStmt, softDeleteWebhook, arg.ID, arg.OrganizationID)
+	return err
+}
+
 const updateWebhook = `-- name: UpdateWebhook :one
 UPDATE webhooks
 SET
@@ -175,8 +194,8 @@ SET
 	retry_policy = $9,
 	updated_at = now()
 WHERE
-	id = $1 AND organization_id = $2
-RETURNING id, label, endpoint, enabled, delay, concurrency, queue, retry_policy, organization_id, created_at, updated_at, secret
+	id = $1 AND organization_id = $2 AND deleted_at IS NULL
+RETURNING id, label, endpoint, enabled, delay, concurrency, queue, retry_policy, organization_id, created_at, updated_at, secret, deleted_at
 `
 
 type UpdateWebhookParams struct {
@@ -217,6 +236,7 @@ func (q *Queries) UpdateWebhook(ctx context.Context, arg UpdateWebhookParams) (W
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Secret,
+		&i.DeletedAt,
 	)
 	return i, err
 }
@@ -226,7 +246,7 @@ UPDATE webhooks
 SET
 	retry_policy = $3
 WHERE
-	id = $1 AND organization_id = $2
+	id = $1 AND organization_id = $2 AND deleted_at IS NULL
 `
 
 type UpdateWebhookRetryPolicyParams struct {
@@ -245,7 +265,7 @@ UPDATE webhooks
 SET
 	secret = $3
 WHERE
-	id = $1 AND organization_id = $2
+	id = $1 AND organization_id = $2 AND deleted_at IS NULL
 `
 
 type UpdateWebhookSecretParams struct {
@@ -264,7 +284,7 @@ UPDATE webhooks
 SET
 	enabled = $3
 WHERE
-	id = $1 AND organization_id = $2
+	id = $1 AND organization_id = $2 AND deleted_at IS NULL
 `
 
 type UpdateWebhookStatusParams struct {

@@ -17,6 +17,9 @@ type Querier interface {
 	GetOrganization(ctx context.Context, id string) (GetOrganizationRow, error)
 	GetUser(ctx context.Context, arg GetUserParams) (GetUserRow, error)
 	GetWebhook(ctx context.Context, arg GetWebhookParams) (GetWebhookRow, error)
+	SoftDeleteOrganization(ctx context.Context, id string) error
+	SoftDeleteUser(ctx context.Context, arg SoftDeleteUserParams) error
+	SoftDeleteWebhook(ctx context.Context, arg SoftDeleteWebhookParams) error
 	UpdateOrganization(ctx context.Context, arg UpdateOrganizationParams) (Organization, error)
 	UpdateOrganizationAvatar(ctx context.Context, arg UpdateOrganizationAvatarParams) error
 	UpdateOrganizationPlan(ctx context.Context, arg UpdateOrganizationPlanParams) error

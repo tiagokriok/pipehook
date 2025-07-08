@@ -149,6 +149,7 @@ type Organization struct {
 	Settings  json.RawMessage `json:"settings"`
 	CreatedAt time.Time       `json:"created_at"`
 	UpdatedAt time.Time       `json:"updated_at"`
+	DeletedAt sql.NullTime    `json:"deleted_at"`
 }
 
 type User struct {
@@ -161,6 +162,7 @@ type User struct {
 	OrganizationID string         `json:"organization_id"`
 	CreatedAt      time.Time      `json:"created_at"`
 	UpdatedAt      time.Time      `json:"updated_at"`
+	DeletedAt      sql.NullTime   `json:"deleted_at"`
 }
 
 type Webhook struct {
@@ -176,4 +178,5 @@ type Webhook struct {
 	CreatedAt      time.Time       `json:"created_at"`
 	UpdatedAt      time.Time       `json:"updated_at"`
 	Secret         string          `json:"secret"`
+	DeletedAt      sql.NullTime    `json:"deleted_at"`
 }

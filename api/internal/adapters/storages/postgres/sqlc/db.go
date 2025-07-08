@@ -48,6 +48,15 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getWebhookStmt, err = db.PrepareContext(ctx, getWebhook); err != nil {
 		return nil, fmt.Errorf("error preparing query GetWebhook: %w", err)
 	}
+	if q.softDeleteOrganizationStmt, err = db.PrepareContext(ctx, softDeleteOrganization); err != nil {
+		return nil, fmt.Errorf("error preparing query SoftDeleteOrganization: %w", err)
+	}
+	if q.softDeleteUserStmt, err = db.PrepareContext(ctx, softDeleteUser); err != nil {
+		return nil, fmt.Errorf("error preparing query SoftDeleteUser: %w", err)
+	}
+	if q.softDeleteWebhookStmt, err = db.PrepareContext(ctx, softDeleteWebhook); err != nil {
+		return nil, fmt.Errorf("error preparing query SoftDeleteWebhook: %w", err)
+	}
 	if q.updateOrganizationStmt, err = db.PrepareContext(ctx, updateOrganization); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateOrganization: %w", err)
 	}
@@ -121,6 +130,21 @@ func (q *Queries) Close() error {
 	if q.getWebhookStmt != nil {
 		if cerr := q.getWebhookStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getWebhookStmt: %w", cerr)
+		}
+	}
+	if q.softDeleteOrganizationStmt != nil {
+		if cerr := q.softDeleteOrganizationStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing softDeleteOrganizationStmt: %w", cerr)
+		}
+	}
+	if q.softDeleteUserStmt != nil {
+		if cerr := q.softDeleteUserStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing softDeleteUserStmt: %w", cerr)
+		}
+	}
+	if q.softDeleteWebhookStmt != nil {
+		if cerr := q.softDeleteWebhookStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing softDeleteWebhookStmt: %w", cerr)
 		}
 	}
 	if q.updateOrganizationStmt != nil {
@@ -220,6 +244,9 @@ type Queries struct {
 	getOrganizationStmt          *sql.Stmt
 	getUserStmt                  *sql.Stmt
 	getWebhookStmt               *sql.Stmt
+	softDeleteOrganizationStmt   *sql.Stmt
+	softDeleteUserStmt           *sql.Stmt
+	softDeleteWebhookStmt        *sql.Stmt
 	updateOrganizationStmt       *sql.Stmt
 	updateOrganizationAvatarStmt *sql.Stmt
 	updateOrganizationPlanStmt   *sql.Stmt
@@ -244,6 +271,9 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getOrganizationStmt:          q.getOrganizationStmt,
 		getUserStmt:                  q.getUserStmt,
 		getWebhookStmt:               q.getWebhookStmt,
+		softDeleteOrganizationStmt:   q.softDeleteOrganizationStmt,
+		softDeleteUserStmt:           q.softDeleteUserStmt,
+		softDeleteWebhookStmt:        q.softDeleteWebhookStmt,
 		updateOrganizationStmt:       q.updateOrganizationStmt,
 		updateOrganizationAvatarStmt: q.updateOrganizationAvatarStmt,
 		updateOrganizationPlanStmt:   q.updateOrganizationPlanStmt,

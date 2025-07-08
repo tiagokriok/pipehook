@@ -16,7 +16,7 @@ INSERT INTO users
 	(id, name, email, username, role, organization_id)
 VALUES
 	($1, $2, $3, $4, $5, $6)
-RETURNING id, name, email, username, avatar, role, organization_id, created_at, updated_at
+RETURNING id, name, email, username, avatar, role, organization_id, created_at, updated_at, deleted_at
 `
 
 type CreateUserParams struct {
@@ -48,6 +48,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.OrganizationID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
@@ -55,7 +56,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 const getAllUsers = `-- name: GetAllUsers :many
 SELECT id, name, email, username, role, avatar, created_at, updated_at FROM users
 WHERE
-	organization_id = $1
+	organization_id = $1 AND deleted_at IS NULL
 ORDER BY created_at
 `
 
@@ -105,7 +106,7 @@ func (q *Queries) GetAllUsers(ctx context.Context, organizationID string) ([]Get
 const getUser = `-- name: GetUser :one
 SELECT id, name, email, username, role, avatar, created_at, updated_at FROM users
 WHERE
-	id = $1 AND organization_id = $2
+	id = $1 AND organization_id = $2 AND deleted_at IS NULL
 `
 
 type GetUserParams struct {
@@ -140,6 +141,24 @@ func (q *Queries) GetUser(ctx context.Context, arg GetUserParams) (GetUserRow, e
 	return i, err
 }
 
+const softDeleteUser = `-- name: SoftDeleteUser :exec
+UPDATE users
+SET
+	deleted_at = now()
+WHERE
+	id = $1 AND organization_id = $2
+`
+
+type SoftDeleteUserParams struct {
+	ID             string `json:"id"`
+	OrganizationID string `json:"organization_id"`
+}
+
+func (q *Queries) SoftDeleteUser(ctx context.Context, arg SoftDeleteUserParams) error {
+	_, err := q.exec(ctx, q.softDeleteUserStmt, softDeleteUser, arg.ID, arg.OrganizationID)
+	return err
+}
+
 const updateUser = `-- name: UpdateUser :one
 UPDATE users
 SET
@@ -148,8 +167,8 @@ SET
 	username = $5,
 	updated_at = now()
 WHERE
-	id = $1 AND organization_id = $2
-RETURNING id, name, email, username, avatar, role, organization_id, created_at, updated_at
+	id = $1 AND organization_id = $2 AND deleted_at IS NULL
+RETURNING id, name, email, username, avatar, role, organization_id, created_at, updated_at, deleted_at
 `
 
 type UpdateUserParams struct {
@@ -179,6 +198,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		&i.OrganizationID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 	)
 	return i, err
 }
@@ -189,7 +209,7 @@ SET
 	avatar = $3,
 	updated_at = now()
 WHERE
-	id = $1 AND organization_id = $2
+	id = $1 AND organization_id = $2 AND deleted_at IS NULL
 `
 
 type UpdateUserAvatarParams struct {
@@ -209,7 +229,7 @@ SET
 	role = $3,
 	updated_at = now()
 WHERE
-	id = $1 AND organization_id = $2
+	id = $1 AND organization_id = $2 AND deleted_at IS NULL
 `
 
 type UpdateUserRoleParams struct {
