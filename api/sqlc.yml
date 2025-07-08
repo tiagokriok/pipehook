@@ -1,0 +1,22 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "internal/adapters/storages/postgres/queries"
+    schema: "migrations"
+    gen:
+      go:
+        package: "sqlc"
+        out: "internal/adapters/storages/postgres/sqlc"
+        emit_json_tags: true
+        emit_prepared_queries: true
+        emit_interface: true
+        emit_exact_table_names: false
+        emit_empty_slices: true
+        overrides:
+          - db_type: "timestamptz"
+            go_type: "time.Time"
+          - db_type: "uuid"
+            go_type: "string"
+          - db_type: "jsonb"
+            go_type:
+              type: "json.RawMessage"
