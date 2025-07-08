@@ -1,4 +1,4 @@
-.PHONY: help dev dev-api dev-events dev-web build build-api build-events build-web clean install db-up db-down db-reset deps-go deps-web
+.PHONY: help dev dev-api dev-receiver dev-web build build-api build-receiver build-web clean install db-up db-down db-reset deps-go deps-web
 
 # Default target
 help: ## Show this help message
@@ -14,11 +14,11 @@ dev: db-up ## Run all services in development mode
 
 dev-api: ## Run API server with hot reload
 	@echo "🔥 Starting API server with hot reload..."
-	@cd api && air
+	@cd api && air -c .air.api.toml
 
-dev-events: ## Run event server with hot reload
-	@echo "🔥 Starting event server with hot reload..."
-	@cd event-server && air
+dev-receiver: ## Run API server with hot reload
+	@echo "🔥 Starting Receiver server with hot reload..."
+	@cd api && air -c .air.receiver.toml
 
 dev-web: ## Run React development server
 	@echo "⚛️  Starting React development server..."
@@ -26,15 +26,15 @@ dev-web: ## Run React development server
 
 ##@ Build Commands
 
-build: build-api build-events build-web ## Build all projects
+build: build-api build-receiver build-web ## Build all projects
 
 build-api: ## Build API server
 	@echo "🏗️  Building API server..."
 	@cd api && go build -o bin/api ./cmd/server
 
-build-events: ## Build event server
-	@echo "🏗️  Building event server..."
-	@cd event-server && go build -o bin/event-server ./cmd/server
+build-receiver: ## Build event server
+	@echo "🏗️  Building event receiver..."
+	@cd api && go build -o bin/event-receiver ./cmd/event-receiver
 
 build-web: ## Build React app for production
 	@echo "🏗️  Building React app..."
@@ -63,7 +63,6 @@ install: deps-go deps-web ## Install all dependencies
 deps-go: ## Install Go dependencies and Air
 	@echo "📦 Installing Go dependencies..."
 	@cd api && go mod tidy && go install github.com/air-verse/air@latest
-	@cd event-server && go mod tidy && go install github.com/air-verse/air@latest
 
 deps-web: ## Install React dependencies
 	@echo "📦 Installing React dependencies..."
@@ -74,28 +73,23 @@ deps-web: ## Install React dependencies
 clean: ## Clean build artifacts and dependencies
 	@echo "🧹 Cleaning build artifacts..."
 	@rm -rf api/bin
-	@rm -rf event-server/bin
 	@rm -rf web/dist
 	@rm -rf web/node_modules
 	@cd api && go clean -cache
-	@cd event-server && go clean -cache
 
 fmt: ## Format code (Go and React)
 	@echo "🎨 Formatting code..."
 	@cd api && go fmt ./...
-	@cd event-server && go fmt ./...
 	@cd web && pnpm format
 
 lint: ## Lint all projects
 	@echo "🔍 Linting projects..."
 	@cd api && go vet ./...
-	@cd event-server && go vet ./...
 	@cd web && pnpm lint
 
 test: ## Run tests for all projects
 	@echo "🧪 Running tests..."
 	@cd api && go test ./...
-	@cd event-server && go test ./...
 
 ##@ Docker Commands
 
