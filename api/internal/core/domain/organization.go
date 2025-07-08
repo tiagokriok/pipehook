@@ -33,6 +33,7 @@ type Organization struct {
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
+	DeletedAt time.Time `json:"deletedAt"`
 }
 
 type OrganizationRepository interface {
@@ -42,6 +43,7 @@ type OrganizationRepository interface {
 	FindById(context context.Context, id string) (*Organization, error)
 	FindAllByOrganizationId(context context.Context, query *port.QueryParams) ([]Organization, error)
 	DestroyById(context context.Context, id string) error
+	SoftDelete(context context.Context, id string) error
 }
 
 func NewOrganization(name, ownerID string) (*Organization, error) {

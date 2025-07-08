@@ -29,6 +29,7 @@ type User struct {
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
+	DeletedAt time.Time `json:"deletedAt"`
 }
 
 type UserRepository interface {
@@ -37,8 +38,7 @@ type UserRepository interface {
 	FindById(context context.Context, organizationID, id string) (*User, error)
 	FindAllByOrganizationId(context context.Context, organizationID string, query *port.QueryParams) ([]User, error)
 	DestroyById(context context.Context, organizationID, id string) error
-	SignUp(context context.Context, user *User) error
-	SignIn(context context.Context, user *User) (string, error)
+	SoftDelete(context context.Context, organizationID, id string) error
 }
 
 func NewUser(name, email, username string, role UserRole) (*User, error) {

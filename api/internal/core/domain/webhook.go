@@ -39,6 +39,7 @@ type Webhook struct {
 
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
+	DeletedAt time.Time `json:"deletedAt"`
 }
 
 type WebhookRepository interface {
@@ -47,6 +48,7 @@ type WebhookRepository interface {
 	FindById(context context.Context, organizationID, id string) (*Webhook, error)
 	FindAllByOrganizationId(context context.Context, organizationID string, query *port.QueryParams) ([]Webhook, error)
 	DestroyById(context context.Context, organizationID, id string) error
+	SoftDelete(context context.Context, organizationID, id string) error
 }
 
 func generateWebhookSecret() string {
